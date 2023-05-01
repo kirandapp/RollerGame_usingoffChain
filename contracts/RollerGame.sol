@@ -22,6 +22,7 @@ contract RollerGame is Ownable {
         require(!couponCodeUsed[_code], "coupon not valid");
         bytes32 hash = _code.toEthSignedMessageHash();
         require((address(hash.recover(sig)) == owner()), "coupon not valid");
+        couponCodeUsed[_code] = true;
         // bytes32 msgHash = keccak256(abi.encodePacked(_code));
         // require(isValidSignature(msgHash, sig),"Invalid signature");
         _;
@@ -46,8 +47,8 @@ contract RollerGame is Ownable {
     }
 
     //internal function
-    function isValidSignature(bytes32 hash, bytes calldata signature) internal view returns (bool isValid) {
-        bytes32 signedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
-        return signedHash.recover(signature) == owner();
-    }
+    // function isValidSignature(bytes32 hash, bytes calldata signature) internal view returns (bool isValid) {
+    //     bytes32 signedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
+    //     return signedHash.recover(signature) == owner();
+    // }
 }
