@@ -1,5 +1,6 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("@nomiclabs/hardhat-ethers");
+require('dotenv').config()
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: "0.8.18",
@@ -11,5 +12,13 @@ module.exports = {
   },
   etherscan: {
     apiKey: `T1CP27RPHNJ79V379B1W2PEF3UBJDH8AG2`,
-  }
+  },
+  settings: {
+    optimizer: {
+      enabled: true,
+      viaIR: true,
+      runs: 200,
+    },
+  },
+  allowUnlimitedContractSize: true,
 };
