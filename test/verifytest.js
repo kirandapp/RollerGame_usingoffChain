@@ -68,7 +68,7 @@ describe("Roller Game", () => {
             // STEP 4: rollover function
             await roller.connect(adminwallet).initialize(tokenTest.address, randomgenerate.address);
             console.log("\nreading token address ",await roller.token());
-            await roller.connect(adminwallet).rollOver(2, time, signature, {gasLimit: 200000});
+            await roller.connect(adminwallet).rollOver(2, messageHash, signature, {gasLimit: 200000});
             console.log("\nContract AFTER Token Balance - ",await tokenTest.balanceOf(roller.address));
             console.log("User AFTER Token Balance - ",await tokenTest.balanceOf(adminwallet.address));
 

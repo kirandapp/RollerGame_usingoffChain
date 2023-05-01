@@ -17,13 +17,13 @@ contract RollerGame is Ownable {
         random = RandomNumberGeneration(_random);
     }
 
-    modifier isCallerValid(uint timestamp, bytes calldata sig) {
-        bytes32 msgHash = keccak256(abi.encodePacked(timestamp));
+    modifier isCallerValid(bytes32 _time, bytes calldata sig) {
+        bytes32 msgHash = keccak256(abi.encodePacked(_time));
         require(isValidSignature(msgHash, sig),"Invalid signature");
         _;
     }
 
-    function rollOver(uint256 _tokenamount, uint time, bytes calldata signature) public isCallerValid(time, signature) {
+    function rollOver(uint256 _tokenamount, bytes32 time, bytes calldata signature) public isCallerValid(time, signature) {
         require(_tokenamount > 0,"token should be greater than Zero.");
         require(token.balanceOf(msg.sender) > 0,"Insufficient Token Balance to play.");
         token.transferFrom(msg.sender, address(this),_tokenamount);
@@ -32,7 +32,7 @@ contract RollerGame is Ownable {
         token.transferFrom(address(this), msg.sender, _tokenamount*2);
     }
 
-    function rollUnder(uint256 _tokenamount, uint time, bytes calldata signature) public isCallerValid(time, signature) {
+    function rollUnder(uint256 _tokenamount, bytes32 time, bytes calldata signature) public isCallerValid(time, signature) {
         require(_tokenamount > 0,"token should be greater than Zero.");
         require(token.balanceOf(msg.sender) > 0,"Insufficient Token Balance to play.");
         token.transferFrom(msg.sender, address(this),_tokenamount);
