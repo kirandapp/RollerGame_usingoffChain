@@ -11,19 +11,23 @@ contract RollerGame is Ownable {
     using ECDSA for bytes32;
     IERC20 public token;
     RandomNumberGeneration public random;
+    mapping(bytes32 => bool) public couponCodeUsed;
 
     function initialize(address _token, address _random) public onlyOwner {
         token = IERC20(_token);
         random = RandomNumberGeneration(_random);
     }
 
-    modifier isCallerValid(bytes32 _time, bytes calldata sig) {
-        bytes32 msgHash = keccak256(abi.encodePacked(_time));
-        require(isValidSignature(msgHash, sig),"Invalid signature");
+    modifier isCallerValid(bytes32 _code, bytes calldata sig) {
+        require(!couponCodeUsed[_code], "coupon not valid");
+        bytes32 hash = _code.toEthSignedMessageHash();
+        require((address(hash.recover(sig)) == owner()), "coupon not valid");
+        // bytes32 msgHash = keccak256(abi.encodePacked(_code));
+        // require(isValidSignature(msgHash, sig),"Invalid signature");
         _;
     }
 
-    function rollOver(uint256 _tokenamount, bytes32 time, bytes calldata signature) public isCallerValid(time, signature) {
+    function rollOver(uint256 _tokenamount, bytes32 _code, bytes calldata signature) public isCallerValid(_code, signature) {
         require(_tokenamount > 0,"token should be greater than Zero.");
         require(token.balanceOf(msg.sender) > 0,"Insufficient Token Balance to play.");
         token.transferFrom(msg.sender, address(this),_tokenamount);
@@ -32,7 +36,7 @@ contract RollerGame is Ownable {
         token.transferFrom(address(this), msg.sender, _tokenamount*2);
     }
 
-    function rollUnder(uint256 _tokenamount, bytes32 time, bytes calldata signature) public isCallerValid(time, signature) {
+    function rollUnder(uint256 _tokenamount, bytes32 _code, bytes calldata signature) public isCallerValid(_code, signature) {
         require(_tokenamount > 0,"token should be greater than Zero.");
         require(token.balanceOf(msg.sender) > 0,"Insufficient Token Balance to play.");
         token.transferFrom(msg.sender, address(this),_tokenamount);

@@ -43,8 +43,8 @@ describe("Roller Game", () => {
 
             const randomNumber = Math.floor(Math.random() * 100) + 1;
             console.log(" \nGenerated Random Number is - ",randomNumber);
-            const time = Date.now()+"";
-            console.log(" time - ",time);
+            const coupon = Date.now()+"";
+            console.log(" Coupon - ",coupon);
             // const letnonce = web3.utils.keccak256(web3.eth.abi.encodeParameters(['string', 'uint'], [nonce, randomNumber]));
 
             //mint token to the game contract
@@ -55,11 +55,11 @@ describe("Roller Game", () => {
             console.log("User BEFORE Token Balance - ",await tokenTest.balanceOf(adminwallet.address));
 
             // STEP 1:
-            let messageHash = ethers.utils.solidityKeccak256(["uint"],[time]);
-            console.log("message - ", messageHash);
+            let encryptedCoupon = ethers.utils.solidityKeccak256(["uint"],[coupon]);
+            console.log("encryptedCoupon - ", encryptedCoupon);
 
             // STEP 2:
-            let message = ethers.utils.arrayify(messageHash);
+            let message = ethers.utils.arrayify(encryptedCoupon);
 
             // STEP 3:
             let signature = await wallet.signMessage(message);
@@ -68,14 +68,15 @@ describe("Roller Game", () => {
             // STEP 4: rollover function
             await roller.connect(adminwallet).initialize(tokenTest.address, randomgenerate.address);
             console.log("\nreading token address ",await roller.token());
-            await roller.connect(adminwallet).rollOver(2, messageHash, signature, {gasLimit: 200000});
+            console.log(" Owner of the Contract - ",await roller.owner());
+            await roller.connect(adminwallet).rollOver(2, encryptedCoupon, signature, {gasLimit: 200000});
             console.log("\nContract AFTER Token Balance - ",await tokenTest.balanceOf(roller.address));
             console.log("User AFTER Token Balance - ",await tokenTest.balanceOf(adminwallet.address));
 
             // // STEP 5 : rollUnder function
             // console.log("\nContract BEFORE Token Balance - ",await tokenTest.balanceOf(roller.address));
             // console.log("User BEFORE Token Balance - ",await tokenTest.balanceOf(adminwallet.address));
-            // result = await roller.connect(adminwallet).rollUnder(2, randomNumber, signature, {gasLimit: 200000});
+            // await roller.connect(adminwallet).rollUnder(2, encryptedCoupon, signature, {gasLimit: 200000});
             // console.log("\nContract AFTER Token Balance - ",await tokenTest.balanceOf(roller.address));
             // console.log("User AFTER Token Balance - ",await tokenTest.balanceOf(adminwallet.address));
         });
