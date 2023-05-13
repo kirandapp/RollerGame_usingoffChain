@@ -11,11 +11,17 @@ contract RollerGame is Ownable {
     using ECDSA for bytes32;
     IERC20 public token;
     RandomNumberGeneration public random;
+    uint256 private winningRate;
+    uint256 private overbids;
+    uint256 private underbids;
     mapping(bytes32 => bool) public couponCodeUsed;
+    mapping(address => uint256) public rollOverBids;
+    mapping (address => uint256) public rollUnderBids;
 
     function initialize(address _token, address _random) public onlyOwner {
         token = IERC20(_token);
         random = RandomNumberGeneration(_random);
+        winningRate = 2;
     }
 
     modifier isCallerValid(bytes32 _code, bytes calldata sig) {
@@ -23,8 +29,6 @@ contract RollerGame is Ownable {
         bytes32 hash = _code.toEthSignedMessageHash();
         require((address(hash.recover(sig)) == owner()), "coupon not valid");
         couponCodeUsed[_code] = true;
-        // bytes32 msgHash = keccak256(abi.encodePacked(_code));
-        // require(isValidSignature(msgHash, sig),"Invalid signature");
         _;
     }
 
@@ -34,7 +38,8 @@ contract RollerGame is Ownable {
         token.transferFrom(msg.sender, address(this),_tokenamount);
         uint256 num = random.generate();
         require(num > 50 || num <= 100,"Try Again");
-        token.transferFrom(address(this), msg.sender, _tokenamount*2);
+        token.transferFrom(address(this), msg.sender, _tokenamount*winningRate);
+        rollOverBids[msg.sender] = overbids++;
     }
 
     function rollUnder(uint256 _tokenamount, bytes32 _code, bytes calldata signature) public isCallerValid(_code, signature) {
@@ -43,7 +48,17 @@ contract RollerGame is Ownable {
         token.transferFrom(msg.sender, address(this),_tokenamount);
         uint256 num = random.generate();
         require(num < 50 || num >= 1,"Try Again");
-        token.transferFrom(address(this), msg.sender, _tokenamount*2);
+        token.transferFrom(address(this), msg.sender, _tokenamount*winningRate);
+        rollUnderBids[msg.sender] = underbids++;
+    }
+
+    function setWinningRatee(uint256 _winningRate) external onlyOwner {
+        require(_winningRate > 0, "input must be greater than 0 and whole number!");
+        winningRate = _winningRate;
+    }
+
+    function getWinningRate() external returns (uint256) {
+        return winningRate;
     }
 
     //internal function
