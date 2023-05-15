@@ -14,6 +14,7 @@ contract RollerGame is Ownable {
     uint256 private winningRate;
     uint256 private overbids;
     uint256 private underbids;
+    uint256 public randomnumber;
     mapping(bytes32 => bool) public couponCodeUsed;
     mapping(address => uint256) public rollOverBids;
     mapping (address => uint256) public rollUnderBids;
@@ -37,6 +38,7 @@ contract RollerGame is Ownable {
         require(token.balanceOf(msg.sender) > 0,"Insufficient Token Balance to play.");
         token.transferFrom(msg.sender, address(this),_tokenamount);
         uint256 num = random.generate();
+        randomnumber = num;
         require(num > 50 || num <= 100,"Try Again");
         token.transferFrom(address(this), msg.sender, _tokenamount*winningRate);
         rollOverBids[msg.sender] = overbids++;
@@ -57,13 +59,7 @@ contract RollerGame is Ownable {
         winningRate = _winningRate;
     }
 
-    function getWinningRate() external returns (uint256) {
+    function getWinningRate() external view returns (uint256) {
         return winningRate;
     }
-
-    //internal function
-    // function isValidSignature(bytes32 hash, bytes calldata signature) internal view returns (bool isValid) {
-    //     bytes32 signedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
-    //     return signedHash.recover(signature) == owner();
-    // }
 }

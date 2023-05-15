@@ -58,7 +58,7 @@ describe("Roller Game", () => {
             // STEP 1:
             let encryptedCoupon = ethers.utils.solidityKeccak256(["uint"],[coupon]);
             console.log("encryptedCoupon - ", encryptedCoupon);
-
+                     
             // STEP 2:
             let message = ethers.utils.arrayify(encryptedCoupon);
             console.log(" message - ",message);
